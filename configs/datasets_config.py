@@ -1,6 +1,6 @@
 # contains directories of database
 
-main_path = { 'main' : '/home/Python/fsb_hashnet/data' }
+main_path = { 'main' : '/mnt/c/Users/msp/Documents/git-repo/fsb_hashnet/data' }
 
 evaluation = { 'verification' : main_path['main'] }
 

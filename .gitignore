@@ -5,3 +5,5 @@ runs/
 *.pth
 /data/non_invertibility/**/*.jpg
 /graphs/**/*.txt
+data/
+.idea/

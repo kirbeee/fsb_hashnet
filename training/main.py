@@ -49,7 +49,7 @@ if __name__ == '__main__': # used for Windows freeze_support() issues
                         metavar='Weight Decay', help='weight decay')
     parser.add_argument('--dropout', '--dropout', default=params.dropout, type=float,
                         metavar='Dropout', help='dropout probability')
-    parser.add_argument('--pretrained', default='/home/tiongsik/Python/conditional_biometrics/models/pretrained/MobileFaceNet_1024.pt', type=str, metavar='PATH',
+    parser.add_argument('--pretrained', default='/mnt/c/Users/msp/Documents/git-repo/fsb_hashnet/models/pretrained/MobileFaceNet_1024.pt', type=str, metavar='PATH',
                         help='path to pretrained checkpoint (default: none)')
 
     args = parser.parse_args()
