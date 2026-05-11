@@ -76,9 +76,9 @@ def session_verify(feature_extractor, generator,
         float: Equal Error Rate value.
     """
     if enroll_sessions is None:
-        enroll_sessions = config.trainingdb.get('train_sessions', [1])
+        enroll_sessions = config.trainingdb['train_sessions']
     if probe_sessions is None:
-        probe_sessions = config.trainingdb.get('test_sessions', [2])
+        probe_sessions = config.trainingdb['test_sessions']
     if class_mode is None:
         class_mode = config.trainingdb.get('class_mode', 'subject_finger')
 
