@@ -17,7 +17,10 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 batch_size = 256
 
 def compute_eer(fpr, tpr):
-    """Compute Equal Error Rate (EER) from false positive and true positive rates."""
+    """Compute Equal Error Rate (EER) where false positive rate equals false negative rate.
+
+    Returns a float EER value.
+    """
     fnr = 1 - tpr
     abs_diffs = np.abs(fpr - fnr)
     min_index = np.argmin(abs_diffs)

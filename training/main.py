@@ -163,7 +163,7 @@ class BiometricTrainer:
         self.writer.interval = 10
         self.evaluator = Evaluator(cfg, log_file)
 
-        self.best_val_eer = 0.0
+        self.best_val_eer = float('inf')
 
         self._prepare_data()
         self._build_models()
@@ -231,7 +231,7 @@ class BiometricTrainer:
             for key, expected_shape, actual_shape in shape_mismatches:
                 print(f"Skipping pretrained weight for {key} (expected {expected_shape}, got {actual_shape}).")
         else:
-            print("Skipping pretrained backbone (path not provided or missing).")
+            print("Pretrained backbone not loaded (path not provided or missing). Proceeding with random initialization.")
 
         self.generator = net.Hash_Generator(embedding_size=self.cfg.dim, do_prob=self.cfg.dropout, device=self.device,
                                             out_embedding_size=self.cfg.hash_dim).to(self.device)
@@ -307,7 +307,7 @@ class BiometricTrainer:
 
             self._log_epoch(epoch, loss, val_eer)
 
-            if val_eer >= self.best_val_eer and params.save:
+            if val_eer <= self.best_val_eer and params.save:
                 self.best_val_eer = val_eer
                 self._save_models()
 
