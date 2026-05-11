@@ -64,7 +64,10 @@ def session_verify(feature_extractor, generator, emb_size=512,
                                    transform=transform, input_size=input_size, roi_size=roi_size)
 
     if len(enroll_set) == 0 or len(probe_set) == 0:
-        raise ValueError('Enrollment or probe set is empty. Check PLUSVein-FV3 paths and session split.')
+        raise ValueError(
+            f'Enrollment or probe set is empty (root: {root_drt}, '
+            f'enroll_sessions: {enroll_sessions}, probe_sessions: {probe_sessions}).'
+        )
 
     enroll_loader = data.DataLoader(enroll_set, batch_size=batch_size, shuffle=False, num_workers=4)
     probe_loader = data.DataLoader(probe_set, batch_size=batch_size, shuffle=False, num_workers=4)
@@ -81,7 +84,10 @@ def session_verify(feature_extractor, generator, emb_size=512,
     imp_scores = score_mat[~gen_mask]
 
     if gen_scores.size == 0 or imp_scores.size == 0:
-        raise ValueError('Insufficient genuine or impostor pairs for EER computation.')
+        raise ValueError(
+            f'Insufficient pairs for EER computation (genuine: {gen_scores.size}, '
+            f'impostor: {imp_scores.size}).'
+        )
 
     y_gen = np.ones(gen_scores.shape[0])
     y_imp = np.zeros(imp_scores.shape[0])

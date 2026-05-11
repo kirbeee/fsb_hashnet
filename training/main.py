@@ -43,7 +43,7 @@ class ExperimentConfig:
     lr: float = params.lr
     w_decay: float = params.w_decay
     dropout: float = params.dropout
-    pretrained_path: str = getattr(params, 'pretrained_path', '')
+    pretrained_path: str = params.pretrained_path
     device: str = params.device
     seed: int = params.seed
 
