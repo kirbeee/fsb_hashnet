@@ -112,7 +112,6 @@ class Evaluator:
         """執行 Epoch 內的快速驗證"""
         val_eer = verification.session_verify(
             feature_extractor, generator,
-            emb_size=self.cfg.hash_dim,
             root_drt=config.evaluation['verification'],
             enroll_sessions=config.trainingdb['train_sessions'],
             probe_sessions=config.trainingdb['test_sessions'],
@@ -133,7 +132,6 @@ class Evaluator:
         for mode in ['stolen', 'user']:
             eer_value = verification.session_verify(
                 feature_extractor, generator,
-                emb_size=self.cfg.hash_dim,
                 root_drt=config.evaluation['verification'],
                 enroll_sessions=config.trainingdb['train_sessions'],
                 probe_sessions=config.trainingdb['test_sessions'],
@@ -163,7 +161,7 @@ class BiometricTrainer:
         self.writer.interval = 10
         self.evaluator = Evaluator(cfg, log_file)
 
-        self.best_val_eer = float('inf')
+        self.best_val_eer = float('inf')  # Lower EER indicates better performance.
 
         self._prepare_data()
         self._build_models()

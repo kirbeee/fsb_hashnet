@@ -19,7 +19,12 @@ batch_size = 256
 def compute_eer(fpr, tpr):
     """Compute Equal Error Rate (EER) where false positive rate equals false negative rate.
 
-    Returns a float EER value.
+    Parameters:
+        fpr (np.ndarray): False positive rate values.
+        tpr (np.ndarray): True positive rate values.
+
+    Returns:
+        float: Equal Error Rate value.
     """
     fnr = 1 - tpr
     abs_diffs = np.abs(fpr - fnr)
@@ -49,11 +54,27 @@ def _collect_embeddings(dloader, feature_extractor, generator, device, mode):
     embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
     return embeddings, labels
 
-def session_verify(feature_extractor, generator, emb_size=512,
+def session_verify(feature_extractor, generator,
                    root_drt=config.evaluation['verification'], device='cuda:0',
                    enroll_sessions=None, probe_sessions=None, mode='user',
                    class_mode=None, input_size=(112, 112), roi_size=None):
-    """Evaluate session-based verification (enroll vs. probe) and return EER."""
+    """Evaluate session-based verification (enroll vs. probe) and return EER.
+
+    Parameters:
+        feature_extractor (torch.nn.Module): Backbone feature extractor.
+        generator (torch.nn.Module): Hash generator.
+        root_drt (str): PLUSVein-FV3 dataset root directory.
+        device (str): Device identifier.
+        enroll_sessions (list[int] | None): Sessions used for enrollment.
+        probe_sessions (list[int] | None): Sessions used for probing.
+        mode (str): 'user' or 'stolen' for label usage in hashing.
+        class_mode (str | None): 'subject' or 'subject_finger' label mode.
+        input_size (tuple[int, int]): Input resize size.
+        roi_size (tuple[int, int] | None): Optional ROI center crop size.
+
+    Returns:
+        float: Equal Error Rate value.
+    """
     if enroll_sessions is None:
         enroll_sessions = config.trainingdb.get('train_sessions', [1])
     if probe_sessions is None:
