@@ -14,5 +14,5 @@ trainingdb = {
     'root_dir': plusvein_fv3['root_dir'],
     'train_sessions': [1],
     'test_sessions': [2],
-    'class_mode': 'subject_finger'
+    'class_mode': 'subject_finger'  # 'subject' or 'subject_finger'
 }

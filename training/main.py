@@ -209,7 +209,7 @@ class BiometricTrainer:
         self.feature_extractor = net.FSB_Hash_Net(embedding_size=self.cfg.dim, do_prob=self.cfg.dropout).to(self.device)
 
         # 處理特徵提取器的預訓練權重載入
-        if self.cfg.pretrained_path and os.path.exists(self.cfg.pretrained_path):
+        if self.cfg.pretrained_path is not None and os.path.exists(self.cfg.pretrained_path):
             state_dict_loaded = self.feature_extractor.state_dict()
             state_dict_pretrained = torch.load(self.cfg.pretrained_path, map_location=self.device)['state_dict']
             state_dict_temp = {}

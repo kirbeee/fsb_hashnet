@@ -30,7 +30,7 @@ def compute_eer(fpr, tpr):
     abs_diffs = np.abs(fpr - fnr)
     min_index = np.argmin(abs_diffs)
     eer = np.mean((fpr[min_index], fnr[min_index]))
-    return np.around(eer, 4)
+    return np.round(eer, 4)
 
 def _collect_embeddings(dloader, feature_extractor, generator, device, mode):
     embeddings = []
