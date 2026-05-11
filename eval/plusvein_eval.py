@@ -17,6 +17,7 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 batch_size = 256
 
 def compute_eer(fpr, tpr):
+    """Compute Equal Error Rate (EER) from false positive and true positive rates."""
     fnr = 1 - tpr
     abs_diffs = np.abs(fpr - fnr)
     min_index = np.argmin(abs_diffs)
@@ -49,6 +50,7 @@ def session_verify(feature_extractor, generator, emb_size=512,
                    root_drt=config.evaluation['verification'], device='cuda:0',
                    enroll_sessions=None, probe_sessions=None, mode='user',
                    class_mode=None, input_size=(112, 112), roi_size=None):
+    """Evaluate session-based verification (enroll vs. probe) and return EER."""
     if enroll_sessions is None:
         enroll_sessions = config.trainingdb.get('train_sessions', [1])
     if probe_sessions is None:
