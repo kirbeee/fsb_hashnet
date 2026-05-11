@@ -170,6 +170,8 @@ class BiometricTrainer:
         self.log_file = log_file
         self.start_string = start_string
         self.writer = SummaryWriter()
+        self.writer.iteration = 0
+        self.writer.interval = 10
         self.evaluator = Evaluator(cfg, log_file)
 
         self.best_val_eer = 0.0
