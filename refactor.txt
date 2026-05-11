@@ -1,0 +1,71 @@
+(fsbHashNet) msp-3060@DESKTOP-LJK4M6B:/mnt/c/Users/msp/Documents/git-repo/fsb_hashnet$ python training/main.py
+Running on device: cuda:0
+Loading Models...
+Val EER (Peri): 0.3312 | Val EER (Face): 0.1509
+Test EER (Peri): {'ethnic': 0.4674, 'pubfig': 0.4514, 'facescrub': 0.4442, 'imdb_wiki': 0.4585, 'ar': 0.4182, 'avg': 44.794, 'std': 1.6736977026930513} | Test EER (Cross): {'ethnic': 0.4674, 'pubfig': 0.4514, 'facescrub': 0.4442, 'imdb_wiki': 0.4585, 'ar': 0.4182, 'avg': 44.794, 'std': 1.6736977026930513}
+
+Epoch 1/10
+----------
+Train | 11909/11909| loss: 1.2723 | peri_loss: 0.1099 | face_loss: 0.0987 | d_loss: 0.6318 | g_loss: 0.5125 | fps:  118.7711 | acc:    0.1713
+Val EER (Peri): 0.1071 | Val EER (Face): 0.0768
+Test EER (Peri): {'ethnic': 0.2765, 'pubfig': 0.28, 'facescrub': 0.234, 'imdb_wiki': 0.2733, 'ar': 0.2111, 'avg': 25.498000000000005, 'std': 2.753306375977799} | Test EER (Cross): {'ethnic': 0.2765, 'pubfig': 0.28, 'facescrub': 0.234, 'imdb_wiki': 0.2733, 'ar': 0.2111, 'avg': 25.498000000000005, 'std': 2.753306375977799}
+Saving Best Models...
+
+Epoch 2/10
+----------
+Train | 11909/11909| loss: 0.7421 | peri_loss: 0.1186 | face_loss: 0.0665 | d_loss: 0.1955 | g_loss: 0.2646 | fps:  118.6412 | acc:    0.3336
+Val EER (Peri): 0.0898 | Val EER (Face): 0.0642
+Test EER (Peri): {'ethnic': 0.2339, 'pubfig': 0.2363, 'facescrub': 0.1899, 'imdb_wiki': 0.2465, 'ar': 0.1719, 'avg': 21.57, 'std': 2.9285901044700675} | Test EER (Cross): {'ethnic': 0.2339, 'pubfig': 0.2363, 'facescrub': 0.1899, 'imdb_wiki': 0.2465, 'ar': 0.1719, 'avg': 21.57, 'std': 2.9285901044700675}
+
+Epoch 3/10
+----------
+Train | 11909/11909| loss: 0.3847 | peri_loss: 0.0779 | face_loss: 0.0733 | d_loss: 0.0881 | g_loss: 0.1617 | fps:  118.9433 | acc:    0.4125
+Val EER (Peri): 0.0845 | Val EER (Face): 0.0546
+Test EER (Peri): {'ethnic': 0.245, 'pubfig': 0.2382, 'facescrub': 0.1874, 'imdb_wiki': 0.2424, 'ar': 0.1664, 'avg': 21.588, 'std': 3.258480627531795} | Test EER (Cross): {'ethnic': 0.245, 'pubfig': 0.2382, 'facescrub': 0.1874, 'imdb_wiki': 0.2424, 'ar': 0.1664, 'avg': 21.588, 'std': 3.258480627531795}
+
+Epoch 4/10
+----------
+Train | 11909/11909| loss: 0.2910 | peri_loss: 0.0969 | face_loss: 0.0627 | d_loss: 0.0780 | g_loss: 0.1780 | fps:  119.7302 | acc:    0.4643
+Val EER (Peri): 0.085 | Val EER (Face): 0.0586
+Test EER (Peri): {'ethnic': 0.2484, 'pubfig': 0.2551, 'facescrub': 0.1903, 'imdb_wiki': 0.2495, 'ar': 0.1896, 'avg': 22.658, 'std': 2.999529296406355} | Test EER (Cross): {'ethnic': 0.2484, 'pubfig': 0.2551, 'facescrub': 0.1903, 'imdb_wiki': 0.2495, 'ar': 0.1896, 'avg': 22.658, 'std': 2.999529296406355}
+
+Epoch 5/10
+----------
+Train | 11909/11909| loss: 0.2506 | peri_loss: 0.1138 | face_loss: 0.0512 | d_loss: 0.0118 | g_loss: 0.1705 | fps:  118.2866 | acc:    0.5032
+Val EER (Peri): 0.0776 | Val EER (Face): 0.0552
+Test EER (Peri): {'ethnic': 0.2269, 'pubfig': 0.2186, 'facescrub': 0.1702, 'imdb_wiki': 0.2327, 'ar': 0.1712, 'avg': 20.392000000000003, 'std': 2.7493664724805242} | Test EER (Cross): {'ethnic': 0.2269, 'pubfig': 0.2186, 'facescrub': 0.1702, 'imdb_wiki': 0.2327, 'ar': 0.1712, 'avg': 20.392000000000003, 'std': 2.7493664724805242}
+
+Epoch 6/10
+----------
+Train | 11909/11909| loss: 0.2253 | peri_loss: 0.0636 | face_loss: 0.0427 | d_loss: 0.0348 | g_loss: 0.1526 | fps:  117.9432 | acc:    0.5359
+Val EER (Peri): 0.0746 | Val EER (Face): 0.058
+Test EER (Peri): {'ethnic': 0.2351, 'pubfig': 0.2299, 'facescrub': 0.1722, 'imdb_wiki': 0.2394, 'ar': 0.1735, 'avg': 21.002000000000002, 'std': 3.0500714745723587} | Test EER (Cross): {'ethnic': 0.2351, 'pubfig': 0.2299, 'facescrub': 0.1722, 'imdb_wiki': 0.2394, 'ar': 0.1735, 'avg': 21.002000000000002, 'std': 3.0500714745723587}
+
+Epoch 7/10
+----------
+Train | 11909/11909| loss: 0.1139 | peri_loss: 0.0325 | face_loss: 0.0445 | d_loss: 0.0033 | g_loss: 0.0772 | fps:  118.5620 | acc:    0.6592
+Val EER (Peri): 0.0736 | Val EER (Face): 0.0519
+Test EER (Peri): {'ethnic': 0.244, 'pubfig': 0.2401, 'facescrub': 0.1778, 'imdb_wiki': 0.2523, 'ar': 0.1698, 'avg': 21.679999999999996, 'std': 3.5420276678761278} | Test EER (Cross): {'ethnic': 0.244, 'pubfig': 0.2401, 'facescrub': 0.1778, 'imdb_wiki': 0.2523, 'ar': 0.1698, 'avg': 21.679999999999996, 'std': 3.5420276678761278}
+
+Epoch 8/10
+----------
+Train | 11909/11909| loss: 0.0883 | peri_loss: 0.0246 | face_loss: 0.0272 | d_loss: 0.0002 | g_loss: 0.0518 | fps:  122.9656 | acc:    0.6894
+Val EER (Peri): 0.0726 | Val EER (Face): 0.0503
+Test EER (Peri): {'ethnic': 0.2431, 'pubfig': 0.2351, 'facescrub': 0.178, 'imdb_wiki': 0.2522, 'ar': 0.1742, 'avg': 21.651999999999997, 'std': 3.3465050425780034} | Test EER (Cross): {'ethnic': 0.2431, 'pubfig': 0.2351, 'facescrub': 0.178, 'imdb_wiki': 0.2522, 'ar': 0.1742, 'avg': 21.651999999999997, 'std': 3.3465050425780034}
+
+Epoch 9/10
+----------
+Train | 11909/11909| loss: 0.0778 | peri_loss: 0.0250 | face_loss: 0.0193 | d_loss: 0.0001 | g_loss: 0.0446 | fps:  125.5414 | acc:    0.7015
+Val EER (Peri): 0.0722 | Val EER (Face): 0.0508
+Test EER (Peri): {'ethnic': 0.243, 'pubfig': 0.2392, 'facescrub': 0.1768, 'imdb_wiki': 0.2514, 'ar': 0.1661, 'avg': 21.529999999999998, 'std': 3.6178999433372945} | Test EER (Cross): {'ethnic': 0.243, 'pubfig': 0.2392, 'facescrub': 0.1768, 'imdb_wiki': 0.2514, 'ar': 0.1661, 'avg': 21.529999999999998, 'std': 3.6178999433372945}
+
+Epoch 10/10
+----------
+Train | 11909/11909| loss: 0.0720 | peri_loss: 0.0187 | face_loss: 0.0229 | d_loss: 0.0002 | g_loss: 0.0415 | fps:  125.6892 | acc:    0.7091
+Val EER (Peri): 0.0742 | Val EER (Face): 0.0511
+Test EER (Peri): {'ethnic': 0.244, 'pubfig': 0.2381, 'facescrub': 0.1748, 'imdb_wiki': 0.2516, 'ar': 0.1737, 'avg': 21.644000000000002, 'std': 3.4714642443787316} | Test EER (Cross): {'ethnic': 0.244, 'pubfig': 0.2381, 'facescrub': 0.1748, 'imdb_wiki': 0.2516, 'ar': 0.1737, 'avg': 21.644000000000002, 'std': 3.4714642443787316}
+
+**** Testing Evaluation (All Datasets) ****
+
+--- Scenario: STOLEN ---
+--- Scenario: USER ---

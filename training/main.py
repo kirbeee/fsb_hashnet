@@ -16,7 +16,6 @@ from torch.optim import lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 
-# 假設這些是您的自定義模組
 sys.path.insert(0, os.path.abspath('.'))
 from configs import params
 from configs import datasets_config as config
@@ -136,25 +135,66 @@ class Evaluator:
         return val_peri, test_peri_avg, test_cross_avg
 
     def evaluate_all_datasets(self, feature_extractor, generator):
-        """最終測試階段：針對多個資料集進行完整的評估"""
+        """最終測試階段：針對多個資料集進行完整的評估與結果輸出"""
         print('\n**** Testing Evaluation (All Datasets) **** \n')
 
         scenarios = ['stolen', 'user']
         results = {}
 
+        # 1. 取得所有 Scenario 的評估結果並印出原始字典
         for mode in scenarios:
-            print(f"--- Scenario: {mode.upper()} ---")
-            results[f'{mode}_peri'] = verification.im_verify(feature_extractor, generator, self.cfg.hash_dim,
-                                                             root_drt=config.evaluation['verification'], peri_flag=True,
-                                                             device=self.device, mode=mode)
-            results[f'{mode}_face'] = verification.im_verify(feature_extractor, generator, self.cfg.hash_dim,
-                                                             root_drt=config.evaluation['verification'],
-                                                             peri_flag=False, device=self.device, mode=mode)
-            results[f'{mode}_cm'] = verification.cm_verify(feature_extractor, generator, emb_size=self.cfg.hash_dim,
-                                                           root_drt=config.evaluation['verification'],
-                                                           device=self.device, mode=mode)
+            peri_res = verification.im_verify(feature_extractor, generator, self.cfg.hash_dim,
+                                              root_drt=config.evaluation['verification'], peri_flag=True,
+                                              device=self.device, mode=mode)
+            face_res = verification.im_verify(feature_extractor, generator, self.cfg.hash_dim,
+                                              root_drt=config.evaluation['verification'],
+                                              peri_flag=False, device=self.device, mode=mode)
+            cm_res = verification.cm_verify(feature_extractor, generator, emb_size=self.cfg.hash_dim,
+                                            root_drt=config.evaluation['verification'],
+                                            device=self.device, mode=mode)
 
-        # 這裡可以實作將 results 寫入日誌檔案的邏輯 (取代原本冗長的 print 與 file.write)
+            results[f'{mode}_peri'] = peri_res
+            results[f'{mode}_face'] = face_res
+            results[f'{mode}_cm'] = cm_res
+
+            print("EER (Periocular)\n")
+            print(peri_res)
+            print("EER (Face)\n")
+            print(face_res)
+            print("Cross-Modal EER\n")
+            print(cm_res)
+
+        # 2. 輸出格式化的摘要 (對應原本的輸出格式)
+        print("**** Testing Summary Results (All Datasets) ****\n")
+
+        datasets = ['ethnic', 'pubfig', 'facescrub', 'imdb_wiki', 'ar']
+        dataset_names = ['Ethnic', 'Pubfig', 'FaceScrub', 'IMDB Wiki', 'AR']
+
+        for ds, ds_name in zip(datasets, dataset_names):
+            print(f"\n {ds_name}\n")
+            print(f"Stolen EER (Periocular) :  {results['stolen_peri'].get(ds)}")
+            print(f"Stolen EER (Face)       :  {results['stolen_face'].get(ds)}")
+            print(f"Stolen Cross-modal EER  :  {results['stolen_cm'].get(ds)}")
+            print(f"EER (Periocular)        :  {results['user_peri'].get(ds)}")
+            print(f"EER (Face)      :  {results['user_face'].get(ds)}")
+            print(f"Cross-modal EER         :  {results['user_cm'].get(ds)}")
+
+        # 3. 計算並輸出 Average
+        print("\n\n Calculating Average\n")
+
+        metrics_to_print = [
+            ('stolen_peri', 'Stolen EER (Periocular)'),
+            ('stolen_face', 'Stolen EER (Face)'),
+            ('stolen_cm', 'Stolen Cross-modal EER'),
+            ('user_peri', 'EER (Periocular)'),
+            ('user_face', 'EER (Face)'),
+            ('user_cm', 'Cross-modal EER')
+        ]
+
+        for key, label in metrics_to_print:
+            avg_stats = verification.get_avg(results[key])
+            print(f"{label} :  {avg_stats.get('avg')} ± {avg_stats.get('std')}")
+
         return results
 
 

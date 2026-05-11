@@ -1,0 +1,331 @@
+(fsbHashNet) msp-3060@DESKTOP-LJK4M6B:/mnt/c/Users/msp/Documents/git-repo/fsb_hashnet/training$ python main.py
+Imported.
+Running on device: cuda:0
+
+***** Face ( Train ) *****
+
+Dataset ImageFolder
+    Number of datapoints: 166737
+    Root location: /mnt/c/Users/msp/Documents/git-repo/fsb_hashnet/data/trainingdb/train/face
+    StandardTransform
+Transform: Compose(
+               Resize(size=(112, 112), interpolation=bilinear, max_size=None, antialias=warn)
+               ToTensor()
+               Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+           )
+Num. of Sub.            : 1054
+Num. of Train. Imgs (Face)      : 166737
+
+***** Periocular ( Train ) *****
+
+Dataset ImageFolder
+    Number of datapoints: 166737
+    Root location: /mnt/c/Users/msp/Documents/git-repo/fsb_hashnet/data/trainingdb/train/peri
+    StandardTransform
+Transform: Compose(
+               Resize(size=(112, 112), interpolation=bilinear, max_size=None, antialias=warn)
+               ToTensor()
+               Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+           )
+Num. of Sub.            : 1054
+Num. of Train Imgs (Periocular)         : 166737
+
+***** Periocular ( Validation ) *****
+
+Dataset ImageFolder
+    Number of datapoints: 47372
+    Root location: /mnt/c/Users/msp/Documents/git-repo/fsb_hashnet/data/trainingdb/val/peri
+    StandardTransform
+Transform: Compose(
+               Resize(size=(112, 112), interpolation=bilinear, max_size=None, antialias=warn)
+               ToTensor()
+               Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+           )
+Num. of Sub.            : 1054
+Num. of Validation Imgs (Periocular)    : 47372
+
+***** Face ( Validation ) *****
+
+Dataset ImageFolder
+    Number of datapoints: 47372
+    Root location: /mnt/c/Users/msp/Documents/git-repo/fsb_hashnet/data/trainingdb/val/face
+    StandardTransform
+Transform: Compose(
+               Resize(size=(112, 112), interpolation=bilinear, max_size=None, antialias=warn)
+               ToTensor()
+               Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+           )
+Num. of Sub.            : 1054
+Num. of Validation Imgs (Periocular)    : 47372
+
+***** Other Parameters *****
+
+Start Time              :  20260507_181214
+Method (Backbone)       :  FSB-HashNet
+Remarks                 :  Default
+Net. Descr.             :  FSB-HashNet
+Seed                    :  42
+Batch Size              :  14
+Emb. Dimension          :  1024
+Hash. Dimension         :  512
+# Epoch                 :  10
+Learning Rate           :  0.001
+LR Scheduler            :  [6]
+Weight Decay            :  1e-05
+Dropout Prob.           :  0.1
+BN Flag                 :  1
+BN Momentum             :  0.1
+Scaling                 :  64.0
+Margin                  :  0.35
+Save Flag               :  True
+Log Writing             :  False
+
+***** *****
+
+Loading Pretrained Model
+
+encoder_1.norm1.weight not loaded!
+encoder_1.norm1.bias not loaded!
+encoder_1.attn.temperature not loaded!
+encoder_1.attn.qkv.weight not loaded!
+encoder_1.attn.qkv_conv.weight not loaded!
+encoder_1.attn.project_out.weight not loaded!
+encoder_1.norm2.weight not loaded!
+encoder_1.norm2.bias not loaded!
+encoder_1.ffn.project_in.weight not loaded!
+encoder_1.ffn.conv.weight not loaded!
+encoder_1.ffn.project_out.weight not loaded!
+encoder_2.norm1.weight not loaded!
+encoder_2.norm1.bias not loaded!
+encoder_2.attn.temperature not loaded!
+encoder_2.attn.qkv.weight not loaded!
+encoder_2.attn.qkv_conv.weight not loaded!
+encoder_2.attn.project_out.weight not loaded!
+encoder_2.norm2.weight not loaded!
+encoder_2.norm2.bias not loaded!
+encoder_2.ffn.project_in.weight not loaded!
+encoder_2.ffn.conv.weight not loaded!
+encoder_2.ffn.project_out.weight not loaded!
+encoder_3.norm1.weight not loaded!
+encoder_3.norm1.bias not loaded!
+encoder_3.attn.temperature not loaded!
+encoder_3.attn.qkv.weight not loaded!
+encoder_3.attn.qkv_conv.weight not loaded!
+encoder_3.attn.project_out.weight not loaded!
+encoder_3.norm2.weight not loaded!
+encoder_3.norm2.bias not loaded!
+encoder_3.ffn.project_in.weight not loaded!
+encoder_3.ffn.conv.weight not loaded!
+encoder_3.ffn.project_out.weight not loaded!
+Appending Face-FC to model ( w.r.t. Face ) ...
+Appending Peri-FC to model ( w.r.t. Periocular ) ...
+Re-Configuring Model, Face-FC, and Peri-FC ...
+
+model (requires grad)   : fc_hash.2.weight
+model (requires grad)   : fc_hash.2.bias
+model (requires grad)   : Learnable_EX_hashingNet.learnable_M
+model (requires grad)   : Learnable_EX_hashingNet.FC1.weight
+model (requires grad)   : Learnable_EX_hashingNet.FC1.bias
+model (requires grad)   : bn.weight
+model (requires grad)   : bn.bias
+feat_fc : ArcFace(in_features = 1024, out_features = 1054, s = 64.0, m = 0.35)
+feat_fc : weight
+hash_fc : ArcFace(in_features = 512, out_features = 1054, s = 128.0, m = 0.35)
+hash_fc : weight
+Val EER - Stolen (Peri) :  0.3312
+Val EER - Stolen (Face) :  0.1509
+Test EER - Stolen (Peri)        :  {'ethnic': 0.3639, 'pubfig': 0.3683, 'facescrub': 0.3467, 'imdb_wiki': 0.365, 'ar': 0.243, 'avg': 33.738, 'std': 4.778424007975852}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.4674, 'pubfig': 0.4514, 'facescrub': 0.4442, 'imdb_wiki': 0.4585, 'ar': 0.4182, 'avg': 44.794, 'std': 1.6736977026930513}
+
+
+Epoch 1/10
+----------
+Train | 11909/11909| loss: 1.2713 | peri_loss: 0.1282 | face_loss: 0.0937 | d_loss: 0.5455 | g_loss: 0.4813 | fps:  130.1142 | acc:    0.1280
+Loss :  tensor(1.2713)
+Val EER - Stolen (Peri) :  0.0821
+Val EER - Stolen (Face) :  0.0413
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1189, 'pubfig': 0.116, 'facescrub': 0.0868, 'imdb_wiki': 0.1157, 'ar': 0.1242, 'avg': 11.232000000000001, 'std': 1.3119969512159702}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.1293, 'pubfig': 0.1247, 'facescrub': 0.0988, 'imdb_wiki': 0.1258, 'ar': 0.137, 'avg': 12.312000000000001, 'std': 1.2899519370891308}
+
+***** *****
+
+Saving Best Model & Rank-1 IR ...
+
+Best Model Pth  :  ./models/best_feature_extractor/FSB-HashNet_Default_20260507_181214.pth
+Best Generator Pth      :  ./models/best_generator/FSB-HashNet_Default_20260507_181214.pth
+Best Face-FC Pth        :  ./models/best_feat_fc/FSB-HashNet_Default_20260507_181214.pth
+Best Peri-FC Pth        :  ./models/best_hash_fc/FSB-HashNet_Default_20260507_181214.pth
+
+
+Epoch 2/10
+----------
+Train | 11909/11909| loss: 0.7722 | peri_loss: 0.1224 | face_loss: 0.0528 | d_loss: 0.2037 | g_loss: 0.2283 | fps:  133.3152 | acc:    0.2391
+Loss :  tensor(0.7722)
+Val EER - Stolen (Peri) :  0.0722
+Val EER - Stolen (Face) :  0.0371
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1173, 'pubfig': 0.1071, 'facescrub': 0.0847, 'imdb_wiki': 0.1093, 'ar': 0.1133, 'avg': 10.633999999999999, 'std': 1.136830682203819}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.1227, 'pubfig': 0.1107, 'facescrub': 0.0869, 'imdb_wiki': 0.1138, 'ar': 0.1274, 'avg': 11.230000000000002, 'std': 1.404378866260811}
+
+
+Epoch 3/10
+----------
+Train | 11909/11909| loss: 0.4176 | peri_loss: 0.0821 | face_loss: 0.0580 | d_loss: 0.0364 | g_loss: 0.1536 | fps:  134.4541 | acc:    0.2893
+Loss :  tensor(0.4176)
+Val EER - Stolen (Peri) :  0.072
+Val EER - Stolen (Face) :  0.0347
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1117, 'pubfig': 0.1072, 'facescrub': 0.0776, 'imdb_wiki': 0.1062, 'ar': 0.123, 'avg': 10.514000000000001, 'std': 1.5005545641528666}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.1202, 'pubfig': 0.1085, 'facescrub': 0.082, 'imdb_wiki': 0.1133, 'ar': 0.1257, 'avg': 10.994000000000002, 'std': 1.5150260723829145}
+
+
+Epoch 4/10
+----------
+Train | 11909/11909| loss: 0.3232 | peri_loss: 0.0917 | face_loss: 0.0472 | d_loss: 0.1943 | g_loss: 0.1437 | fps:  134.9150 | acc:    0.3228
+Loss :  tensor(0.3232)
+Val EER - Stolen (Peri) :  0.0672
+Val EER - Stolen (Face) :  0.034
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1111, 'pubfig': 0.1033, 'facescrub': 0.0722, 'imdb_wiki': 0.1028, 'ar': 0.1328, 'avg': 10.444, 'std': 1.9452773581163176}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.1174, 'pubfig': 0.1049, 'facescrub': 0.0755, 'imdb_wiki': 0.1075, 'ar': 0.1321, 'avg': 10.748, 'std': 1.8622180323474478}
+
+
+Epoch 5/10
+----------
+Train | 11909/11909| loss: 0.2856 | peri_loss: 0.1234 | face_loss: 0.0496 | d_loss: 0.0129 | g_loss: 0.4075 | fps:  135.1684 | acc:    0.3494
+Loss :  tensor(0.2856)
+Val EER - Stolen (Peri) :  0.0649
+Val EER - Stolen (Face) :  0.0331
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1054, 'pubfig': 0.1069, 'facescrub': 0.0724, 'imdb_wiki': 0.1045, 'ar': 0.1124, 'avg': 10.032, 'std': 1.4226932206206646}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.1149, 'pubfig': 0.1108, 'facescrub': 0.0775, 'imdb_wiki': 0.1106, 'ar': 0.1194, 'avg': 10.664000000000003, 'std': 1.4920938308296836}
+
+
+Epoch 6/10
+----------
+Train | 11909/11909| loss: 0.2624 | peri_loss: 0.1009 | face_loss: 0.0346 | d_loss: 0.0089 | g_loss: 0.1415 | fps:  136.9688 | acc:    0.3685
+Loss :  tensor(0.2624)
+Val EER - Stolen (Peri) :  0.0645
+Val EER - Stolen (Face) :  0.0342
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1047, 'pubfig': 0.1008, 'facescrub': 0.0695, 'imdb_wiki': 0.1003, 'ar': 0.1123, 'avg': 9.752, 'std': 1.4653381862218697}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.1167, 'pubfig': 0.1023, 'facescrub': 0.0733, 'imdb_wiki': 0.1064, 'ar': 0.1313, 'avg': 10.600000000000001, 'std': 1.9171437087500767}
+
+
+Epoch 7/10
+----------
+Train | 11909/11909| loss: 0.1508 | peri_loss: 0.0606 | face_loss: 0.0522 | d_loss: 0.0019 | g_loss: 0.1130 | fps:  129.0913 | acc:    0.4733
+Loss :  tensor(0.1508)
+Val EER - Stolen (Peri) :  0.0587
+Val EER - Stolen (Face) :  0.0306
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1058, 'pubfig': 0.0945, 'facescrub': 0.0626, 'imdb_wiki': 0.0932, 'ar': 0.1156, 'avg': 9.434000000000001, 'std': 1.7844169916249955}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.112, 'pubfig': 0.0956, 'facescrub': 0.0648, 'imdb_wiki': 0.0975, 'ar': 0.1272, 'avg': 9.942, 'std': 2.072104244481923}
+
+
+Epoch 8/10
+----------
+Train | 11909/11909| loss: 0.1256 | peri_loss: 0.0492 | face_loss: 0.0214 | d_loss: 0.0010 | g_loss: 0.0706 | fps:  128.5005 | acc:    0.4925
+Loss :  tensor(0.1256)
+Val EER - Stolen (Peri) :  0.0577
+Val EER - Stolen (Face) :  0.0304
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1052, 'pubfig': 0.095, 'facescrub': 0.0612, 'imdb_wiki': 0.0938, 'ar': 0.1174, 'avg': 9.452, 'std': 1.8700417107647627}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.1102, 'pubfig': 0.0959, 'facescrub': 0.0647, 'imdb_wiki': 0.0982, 'ar': 0.1215, 'avg': 9.809999999999999, 'std': 1.9049304449244335}
+
+
+Epoch 9/10
+----------
+Train | 11909/11909| loss: 0.1152 | peri_loss: 0.0483 | face_loss: 0.0318 | d_loss: 0.0007 | g_loss: 0.0801 | fps:  119.9109 | acc:    0.4998
+Loss :  tensor(0.1152)
+Val EER - Stolen (Peri) :  0.0562
+Val EER - Stolen (Face) :  0.0302
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1037, 'pubfig': 0.0955, 'facescrub': 0.0609, 'imdb_wiki': 0.0935, 'ar': 0.1155, 'avg': 9.382, 'std': 1.8189491471726196}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.1103, 'pubfig': 0.0966, 'facescrub': 0.0648, 'imdb_wiki': 0.0982, 'ar': 0.1207, 'avg': 9.812000000000001, 'std': 1.8818862877442943}
+
+
+Epoch 10/10
+----------
+Train | 11909/11909| loss: 0.1099 | peri_loss: 0.0405 | face_loss: 0.0231 | d_loss: 0.0000 | g_loss: 0.0636 | fps:  119.6406 | acc:    0.5039
+Loss :  tensor(0.1099)
+Val EER - Stolen (Peri) :  0.056
+Val EER - Stolen (Face) :  0.0306
+Test EER - Stolen (Peri)        :  {'ethnic': 0.1011, 'pubfig': 0.0958, 'facescrub': 0.0611, 'imdb_wiki': 0.0935, 'ar': 0.1115, 'avg': 9.26, 'std': 1.6927846880214859}
+Test EER - Stolen (Cross)       :  {'ethnic': 0.1129, 'pubfig': 0.0954, 'facescrub': 0.0629, 'imdb_wiki': 0.0982, 'ar': 0.1215, 'avg': 9.818, 'std': 2.0064436199405153}
+
+**** Testing Evaluation (All Datasets) ****
+
+EER (Periocular)
+
+{'ethnic': 0.1011, 'pubfig': 0.0958, 'facescrub': 0.0611, 'imdb_wiki': 0.0935, 'ar': 0.1115}
+EER (Face)
+
+{'ethnic': 0.0646, 'pubfig': 0.0418, 'facescrub': 0.0322, 'imdb_wiki': 0.0534, 'ar': 0.0547}
+Cross-Modal EER
+
+{'ethnic': 0.1129, 'pubfig': 0.0954, 'facescrub': 0.0629, 'imdb_wiki': 0.0982, 'ar': 0.1215}
+EER (Periocular)
+
+{'ethnic': 0.0517, 'pubfig': 0.0516, 'facescrub': 0.0287, 'imdb_wiki': 0.053, 'ar': 0.0267}
+EER (Face)
+
+{'ethnic': 0.0331, 'pubfig': 0.0146, 'facescrub': 0.0139, 'imdb_wiki': 0.0288, 'ar': 0.006}
+Cross-Modal EER
+
+{'ethnic': 0.0563, 'pubfig': 0.052, 'facescrub': 0.0319, 'imdb_wiki': 0.0617, 'ar': 0.0487}
+**** Testing Summary Results (All Datasets) ****
+
+
+
+ Ethnic
+
+Stolen EER (Periocular) :  0.1011
+Stolen EER (Face)       :  0.0646
+Stolen Cross-modal EER  :  0.1129
+EER (Periocular)        :  0.0517
+EER (Face)      :  0.0331
+Cross-modal EER         :  0.0563
+
+
+ Pubfig
+
+Stolen EER (Periocular) :  0.0958
+Stolen EER (Face)       :  0.0418
+Stolen Cross-modal EER  :  0.0954
+EER (Periocular)        :  0.0516
+EER (Face)      :  0.0146
+Cross-modal EER         :  0.052
+
+
+ FaceScrub
+
+Stolen EER (Periocular) :  0.0611
+Stolen EER (Face)       :  0.0322
+Stolen Cross-modal EER  :  0.0629
+EER (Periocular)        :  0.0287
+EER (Face)      :  0.0139
+Cross-modal EER         :  0.0319
+
+
+ IMDB Wiki
+
+Stolen EER (Periocular) :  0.0935
+Stolen EER (Face)       :  0.0534
+Stolen Cross-modal EER  :  0.0982
+EER (Periocular)        :  0.053
+EER (Face)      :  0.0288
+Cross-modal EER         :  0.0617
+
+
+ AR
+
+Stolen EER (Periocular) :  0.1115
+Stolen EER (Face)       :  0.0547
+Stolen Cross-modal EER  :  0.1215
+EER (Periocular)        :  0.0267
+EER (Face)      :  0.006
+Cross-modal EER         :  0.0487
+
+
+
+ Calculating Average
+
+Stolen EER (Periocular) :  9.26 ± 1.6927846880214859
+Stolen EER (Face)       :  4.934 ± 1.1213491873631516
+Stolen Cross-modal EER  :  9.818 ± 2.0064436199405153
+EER (Periocular)        :  4.234 ± 1.1980417355000617
+EER (Face)      :  1.9280000000000002 ± 1.0087893734571156
+Cross-modal EER         :  5.012 ± 1.0097603676120388
