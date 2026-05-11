@@ -2,23 +2,17 @@
 
 main_path = { 'main' : '/mnt/c/Users/msp/Documents/git-repo/fsb_hashnet/data' }
 
-evaluation = { 'verification' : main_path['main'] }
+plusvein_fv3 = {
+    'db_name': 'plusvein_fv3',
+    'root_dir': main_path['main'] + '/PLUSVein-FV3'
+}
 
-trainingdb = { 'db_name' : 'trainingdb', 
-              'face_train' : main_path['main'] + '/trainingdb/train/face', 'peri_train' : main_path['main'] + '/trainingdb/train/peri', 
-              'face_val' : main_path['main'] + '/trainingdb/val/face', 'peri_val' : main_path['main'] + '/trainingdb/val/peri'}
+evaluation = { 'verification' : plusvein_fv3['root_dir'] }
 
-ethnic = { 'db_name' : 'ethnic',  
-'face_gallery' : main_path['main'] + '/ethnic/Recognition/gallery/face',  'peri_gallery' : main_path['main'] + '/ethnic/Recognition/gallery/peri',}
-
-pubfig = { 'db_name' : 'pubfig',
-'face_gallery' : main_path['main'] + '/pubfig/gallery/face', 'peri_gallery' : main_path['main'] + '/pubfig/gallery/peri',}
-
-facescrub = { 'db_name' : 'facescrub',
-'face_gallery' : main_path['main'] + '/facescrub/gallery/face', 'peri_gallery' : main_path['main'] + '/facescrub/gallery/peri',}
-
-imdb_wiki = { 'db_name' : 'imdb_wiki',
-'face_gallery' : main_path['main'] + '/imdb_wiki/gallery/face', 'peri_gallery' : main_path['main'] + '/imdb_wiki/gallery/peri',}
-
-ar = { 'db_name' : 'ar',
-'face_gallery' : main_path['main'] + '/ar/gallery/face', 'peri_gallery' : main_path['main'] + '/ar/gallery/peri',}
+trainingdb = {
+    'db_name': plusvein_fv3['db_name'],
+    'root_dir': plusvein_fv3['root_dir'],
+    'train_sessions': [1],
+    'test_sessions': [2],
+    'class_mode': 'subject_finger'
+}

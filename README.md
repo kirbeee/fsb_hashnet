@@ -15,8 +15,7 @@
 
 ## Pre-requisites:
 - <b>Environment: </b>Check `requirements.txt` file which was generated using `pip list --format=freeze > requirements.txt` command for the environment requirement. These files are slightly filtered manually, so there may be redundant packages.
-- <b>Dataset: </b> Download dataset (training and testing) from [this link](https://www.dropbox.com/s/bfub8fmc44tvcxb/periocular_face_dataset.zip?dl=0). Password is _conditional\_biometrics_.
-Ensure that datasets are located in `data` directory. Configure `datasets_config.py` file to point to this data directory by changing main path.
+- <b>Dataset: </b> Prepare the PLUSVein-FV3 dataset (training and testing). Ensure the dataset root is located in the `data` directory (e.g., `data/PLUSVein-FV3`) and configure `datasets_config.py` to point to this data directory and session split.
 - <b>Pre-trained models: </b>(Optional) The pre-trained MobileFaceNet model for fine-tuning or testing can be downloaded from [this link](https://www.dropbox.com/scl/fi/l3k1h3tc12vy7puargfc3/MobileFaceNet_1024.pt?rlkey=m9zock9slmaivhij6sptjyzl6&st=jy9cb6oj&dl=0).
 
 ## Training: 

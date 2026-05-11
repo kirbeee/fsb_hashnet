@@ -1,4 +1,5 @@
 import sys, os
+import re
 sys.path.insert(0, os.path.abspath('.'))
 import numpy as np
 import torch
@@ -7,6 +8,7 @@ import random
 import cv2
 from torch.nn import functional as F
 import torch.utils.data as data
+from PIL import Image
 
 from torch.utils.data.sampler import BatchSampler
 from configs.params import batch_sub, batch_samp, batch_size, seed, device, random_batch_size, test_batch_size
@@ -97,6 +99,93 @@ class MyDataset(data.Dataset):
     def __len__(self):
         return len(self.dataset)
 
+PLUSVEIN_FILENAME_RE = re.compile(
+    r'^(?P<subject>\d+)_(?P<finger>[A-Za-z]+)_(?P<session>\d+)_(?P<image>\d+)\.(bmp|png|jpg|jpeg)$',
+    re.IGNORECASE
+)
+DEFAULT_FINGER_ORDER = ['LI', 'LM', 'LR', 'RI', 'RM', 'RR']
+
+def _finger_sort_key(code):
+    code = code.upper()
+    if code in DEFAULT_FINGER_ORDER:
+        return (0, DEFAULT_FINGER_ORDER.index(code))
+    return (1, code)
+
+def build_plusvein_transforms(input_size, roi_size=None, augment=False):
+    transform_steps = []
+    if roi_size is not None:
+        transform_steps.append(transforms.CenterCrop(roi_size))
+    if augment:
+        transform_steps.extend([
+            transforms.RandomAffine(degrees=8, translate=None, scale=(0.95, 1.05), shear=0),
+            transforms.RandomHorizontalFlip(p=0.3),
+        ])
+    transform_steps.extend([
+        transforms.Resize(input_size),
+        transforms.ToTensor(),
+        transforms.Normalize([0.5], [0.5]),
+    ])
+    return transforms.Compose(transform_steps)
+
+class PlusVeinFV3Dataset(data.Dataset):
+    def __init__(self, root_dir, sessions=None, class_mode='subject_finger',
+                 transform=None, input_size=(112, 112), roi_size=None):
+        self.root_dir = root_dir
+        self.sessions = sessions
+        self.class_mode = class_mode
+        self.input_size = input_size
+        self.roi_size = roi_size
+        self.samples = []
+        for root, _, files in os.walk(root_dir):
+            for file_name in files:
+                if not file_name.lower().endswith(('.bmp', '.png', '.jpg', '.jpeg')):
+                    continue
+                match = PLUSVEIN_FILENAME_RE.match(file_name)
+                if not match:
+                    continue
+                subject_id = int(match.group('subject'))
+                finger_code = match.group('finger').upper()
+                session_id = int(match.group('session'))
+                if sessions is not None and session_id not in sessions:
+                    continue
+                self.samples.append({
+                    'path': os.path.join(root, file_name),
+                    'subject': subject_id,
+                    'finger': finger_code,
+                    'session': session_id
+                })
+
+        self.subject_ids = sorted({sample['subject'] for sample in self.samples})
+        self.subject_to_idx = {subject: idx for idx, subject in enumerate(self.subject_ids)}
+        self.finger_codes = sorted({sample['finger'] for sample in self.samples}, key=_finger_sort_key)
+        self.finger_to_idx = {finger: idx for idx, finger in enumerate(self.finger_codes)}
+
+        self.paths = []
+        self.labels = []
+        for sample in self.samples:
+            subject_idx = self.subject_to_idx[sample['subject']]
+            finger_idx = self.finger_to_idx[sample['finger']]
+            if class_mode == 'subject':
+                label = subject_idx
+            elif class_mode == 'subject_finger':
+                label = subject_idx * len(self.finger_codes) + finger_idx
+            else:
+                raise ValueError(f'Unsupported class_mode: {class_mode}')
+            self.paths.append(sample['path'])
+            self.labels.append(label)
+
+        self.num_classes = len(self.subject_ids) if class_mode == 'subject' else len(self.subject_ids) * len(self.finger_codes)
+        self.transform = transform or build_plusvein_transforms(self.input_size, self.roi_size, augment=False)
+
+    def __len__(self):
+        return len(self.paths)
+
+    def __getitem__(self, idx):
+        image = Image.open(self.paths[idx]).convert('L')
+        image = self.transform(image)
+        label = self.labels[idx]
+        return image, label
+
 def gen_data(path_dir, mode, type='periocular', aug='False', indexing = False):
     if mode == 'test' and aug == 'True':
         raise('Testing dataset has augmentation!')
@@ -139,4 +228,32 @@ def gen_data(path_dir, mode, type='periocular', aug='False', indexing = False):
         data_loader = torch.utils.data.DataLoader(data_sets, batch_size = test_batch_size*4, shuffle = False, 
                                                 num_workers = 6, worker_init_fn = random.seed(seed))
     
+    return data_loader, data_set
+
+def gen_plusvein_data(path_dir, mode, sessions=None, class_mode='subject_finger',
+                      aug='False', indexing=False, input_size=(112, 112), roi_size=None,
+                      balanced=True):
+    if mode == 'test' and aug == 'True':
+        raise('Testing dataset has augmentation!')
+
+    data_trans = build_plusvein_transforms(input_size, roi_size=roi_size, augment=False)
+    aug_trans = build_plusvein_transforms(input_size, roi_size=roi_size, augment=True)
+    transform = aug_trans if aug == 'True' else data_trans
+
+    data_set = PlusVeinFV3Dataset(path_dir, sessions=sessions, class_mode=class_mode,
+                                  transform=transform, input_size=input_size, roi_size=roi_size)
+
+    if indexing == True:
+        data_set = MyDataset(data_set)
+
+    if mode == 'train' and balanced:
+        data_sampler = BalancedBatchSampler(data_set.labels, n_classes=batch_sub, n_samples=batch_samp)
+        data_loader = torch.utils.data.DataLoader(data_set, batch_sampler=data_sampler, num_workers=4,
+                                                  worker_init_fn=random.seed(seed))
+    else:
+        shuffle = mode == 'train'
+        data_loader = torch.utils.data.DataLoader(data_set, batch_size=test_batch_size if mode == 'test' else batch_size,
+                                                  shuffle=shuffle, drop_last=shuffle, num_workers=4,
+                                                  worker_init_fn=random.seed(seed))
+
     return data_loader, data_set

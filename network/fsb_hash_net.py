@@ -133,7 +133,7 @@ class PFE_Block(nn.Module):
 class FSB_Hash_Net(Module):   
     def __init__(self, embedding_size=1024, do_prob=0.0, out_h=7, out_w=7):
         super(FSB_Hash_Net, self).__init__()
-        self.conv1 = Conv_block(3, 64, kernel=(3, 3), stride=(2, 2), padding=(1, 1))
+        self.conv1 = Conv_block(1, 64, kernel=(3, 3), stride=(2, 2), padding=(1, 1))
         self.conv2_dw = Conv_block(64, 64, kernel=(3, 3), stride=(1, 1), padding=(1, 1), groups=64)
         self.conv_23 = Depth_Wise(64, 64, kernel=(3, 3), stride=(2, 2), padding=(1, 1), groups=128)
         self.conv_3 = Residual(64, num_block=4, groups=128, kernel=(3, 3), stride=(1, 1), padding=(1, 1))
@@ -238,69 +238,6 @@ class Hash_Generator(Module):
             return torch.tanh(F.normalize(emb, p=2, dim=1))
         else:
             return torch.sign(F.normalize(emb, p=2, dim=1))
-
-
-#### Modality Discriminator ####
-# Gradient Reversal Layer (GRL)
-def calc_coeff(iter_num, high=1.0, low=0.0, alpha=10.0, max_iter=10000.0):
-    return float(2.0 * (high - low) / (1.0 + np.exp(-alpha*iter_num / max_iter)) - (high - low) + low)
-
-def grl_hook(coeff):
-    def fun1(grad):
-        return -coeff*grad.clone()
-    return fun1
-
-def init_weights(m):
-    classname = m.__class__.__name__
-    if classname.find('Conv2d') != -1 or classname.find('ConvTranspose2d') != -1:
-        nn.init.kaiming_uniform_(m.weight)
-        nn.init.zeros_(m.bias)
-    elif classname.find('BatchNorm') != -1:
-        nn.init.normal_(m.weight, 1.0, 0.02)
-        nn.init.zeros_(m.bias)
-    elif classname.find('Linear') != -1:
-        nn.init.xavier_normal_(m.weight)
-        nn.init.zeros_(m.bias)
-
-# Main Modality Discriminator Network
-class Modality_Discriminator(Module):
-  def __init__(self, input_dim=1024, hidden_size=512):
-    super(Modality_Discriminator, self).__init__()
-    self.ad_layer1 = Linear(input_dim, hidden_size)
-    self.ad_layer2 = Linear(hidden_size, hidden_size)
-    self.ad_layer3 = Linear(hidden_size, 1)
-    self.relu1 = nn.ReLU()
-    self.relu2 = nn.ReLU()
-    self.dropout1 = Dropout(0.5)
-    self.dropout2 = Dropout(0.5)
-    self.sigmoid = nn.Sigmoid()
-    self.apply(init_weights)
-    self.iter_num = 0
-    self.alpha = 10
-    self.low = 0.0
-    self.high = 1.0
-    self.max_iter = 10000.0
-
-  def forward(self, x):
-    if self.training:
-        self.iter_num += 1
-    coeff = calc_coeff(self.iter_num, self.high, self.low, self.alpha, self.max_iter)
-    x = x * 1.0
-    x.register_hook(grl_hook(coeff))   
-    x = self.ad_layer1(x)
-    x = self.relu1(x)
-    x = self.dropout1(x)
-    x = self.ad_layer2(x)
-    x = self.relu2(x)
-    x = self.dropout2(x)
-    y = self.ad_layer3(x)
-    y = self.sigmoid(y)   
-    return y
-
-  def output_num(self):
-    return 1
-  def get_parameters(self):
-    return [{"params":self.parameters(), "lr_mult":10, 'decay_mult':2}]
 
 
 if __name__ == '__main__':

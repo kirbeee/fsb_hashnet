@@ -23,7 +23,7 @@ import data.data_loader as data_loader
 from network.logits import ArcFace
 import network.fsb_hash_net as net
 import train as train_module
-import eval.roc_eval_verification as verification
+import eval.plusvein_eval as verification
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
@@ -43,7 +43,7 @@ class ExperimentConfig:
     lr: float = params.lr
     w_decay: float = params.w_decay
     dropout: float = params.dropout
-    pretrained_path: str = '/mnt/c/Users/msp/Documents/git-repo/fsb_hashnet/models/pretrained/MobileFaceNet_1024.pt'
+    pretrained_path: str = getattr(params, 'pretrained_path', '')
     device: str = params.device
     seed: int = params.seed
 
@@ -59,6 +59,7 @@ class ExperimentConfig:
         parser.add_argument('--lr', default=cls.lr, type=float)
         parser.add_argument('--w_decay', default=cls.w_decay, type=float)
         parser.add_argument('--dropout', default=cls.dropout, type=float)
+        parser.add_argument('--pretrained_path', default=cls.pretrained_path, type=str)
         args = parser.parse_args()
         return cls(**vars(args))
 
@@ -109,91 +110,39 @@ class Evaluator:
 
     def validate(self, feature_extractor, generator):
         """執行 Epoch 內的快速驗證"""
-        val_peri = verification.val_verify(feature_extractor, generator, config.trainingdb['db_name'],
-                                           emb_size=self.cfg.hash_dim, peri_flag=True,
-                                           root_drt=config.evaluation['verification'], device=self.device,
-                                           mode='stolen')
+        val_eer = verification.session_verify(
+            feature_extractor, generator,
+            emb_size=self.cfg.hash_dim,
+            root_drt=config.evaluation['verification'],
+            enroll_sessions=config.trainingdb['train_sessions'],
+            probe_sessions=config.trainingdb['test_sessions'],
+            device=self.device,
+            mode='stolen',
+            class_mode=config.trainingdb['class_mode']
+        )
 
-        val_face = verification.val_verify(feature_extractor, generator, config.trainingdb['db_name'],
-                                           emb_size=self.cfg.hash_dim, peri_flag=False,
-                                           root_drt=config.evaluation['verification'], device=self.device,
-                                           mode='stolen')
+        print(f'Val EER (Session 1→2): {val_eer}')
 
-        test_peri = verification.im_verify(feature_extractor, generator, emb_size=self.cfg.hash_dim,
-                                           root_drt=config.evaluation['verification'], peri_flag=True,
-                                           device=self.device, mode='stolen')
-        test_peri_avg = verification.get_avg(test_peri)
-
-        test_cross = verification.cm_verify(feature_extractor, generator, emb_size=self.cfg.hash_dim,
-                                            root_drt=config.evaluation['verification'], device=self.device,
-                                            mode='stolen')
-        test_cross_avg = verification.get_avg(test_cross)
-
-        print(f'Val EER (Peri): {val_peri} | Val EER (Face): {val_face}')
-        print(f'Test EER (Peri): {test_peri_avg} | Test EER (Cross): {test_cross_avg}')
-
-        return val_peri, test_peri_avg, test_cross_avg
+        return val_eer
 
     def evaluate_all_datasets(self, feature_extractor, generator):
-        """最終測試階段：針對多個資料集進行完整的評估與結果輸出"""
-        print('\n**** Testing Evaluation (All Datasets) **** \n')
+        """最終測試階段：Session-based 驗證"""
+        print('\n**** Testing Evaluation (PLUSVein-FV3) **** \n')
 
-        scenarios = ['stolen', 'user']
         results = {}
-
-        # 1. 取得所有 Scenario 的評估結果並印出原始字典
-        for mode in scenarios:
-            peri_res = verification.im_verify(feature_extractor, generator, self.cfg.hash_dim,
-                                              root_drt=config.evaluation['verification'], peri_flag=True,
-                                              device=self.device, mode=mode)
-            face_res = verification.im_verify(feature_extractor, generator, self.cfg.hash_dim,
-                                              root_drt=config.evaluation['verification'],
-                                              peri_flag=False, device=self.device, mode=mode)
-            cm_res = verification.cm_verify(feature_extractor, generator, emb_size=self.cfg.hash_dim,
-                                            root_drt=config.evaluation['verification'],
-                                            device=self.device, mode=mode)
-
-            results[f'{mode}_peri'] = peri_res
-            results[f'{mode}_face'] = face_res
-            results[f'{mode}_cm'] = cm_res
-
-            print("EER (Periocular)\n")
-            print(peri_res)
-            print("EER (Face)\n")
-            print(face_res)
-            print("Cross-Modal EER\n")
-            print(cm_res)
-
-        # 2. 輸出格式化的摘要 (對應原本的輸出格式)
-        print("**** Testing Summary Results (All Datasets) ****\n")
-
-        datasets = ['ethnic', 'pubfig', 'facescrub', 'imdb_wiki', 'ar']
-        dataset_names = ['Ethnic', 'Pubfig', 'FaceScrub', 'IMDB Wiki', 'AR']
-
-        for ds, ds_name in zip(datasets, dataset_names):
-            print(f"\n {ds_name}\n")
-            print(f"Stolen EER (Periocular) :  {results['stolen_peri'].get(ds)}")
-            print(f"Stolen EER (Face)       :  {results['stolen_face'].get(ds)}")
-            print(f"Stolen Cross-modal EER  :  {results['stolen_cm'].get(ds)}")
-            print(f"EER (Periocular)        :  {results['user_peri'].get(ds)}")
-            print(f"EER (Face)      :  {results['user_face'].get(ds)}")
-            print(f"Cross-modal EER         :  {results['user_cm'].get(ds)}")
-
-        # 3. 計算並輸出 Average
-        print("\n\n Calculating Average\n")
-
-        metrics_to_print = [
-            ('stolen_peri', 'Stolen EER (Periocular)'),
-            ('stolen_face', 'Stolen EER (Face)'),
-            ('stolen_cm', 'Stolen Cross-modal EER'),
-            ('user_peri', 'EER (Periocular)'),
-            ('user_face', 'EER (Face)'),
-            ('user_cm', 'Cross-modal EER')
-        ]
-
-        for key, label in metrics_to_print:
-            avg_stats = verification.get_avg(results[key])
-            print(f"{label} :  {avg_stats.get('avg')} ± {avg_stats.get('std')}")
+        for mode in ['stolen', 'user']:
+            eer_value = verification.session_verify(
+                feature_extractor, generator,
+                emb_size=self.cfg.hash_dim,
+                root_drt=config.evaluation['verification'],
+                enroll_sessions=config.trainingdb['train_sessions'],
+                probe_sessions=config.trainingdb['test_sessions'],
+                device=self.device,
+                mode=mode,
+                class_mode=config.trainingdb['class_mode']
+            )
+            results[mode] = eer_value
+            print(f"EER ({mode}) : {eer_value}")
 
         return results
 
@@ -222,16 +171,18 @@ class BiometricTrainer:
 
     def _prepare_data(self):
         """處理所有 DataLoader 的建立"""
-        self.face_loader_train, self.face_train_set = data_loader.gen_data(config.trainingdb['face_train'],
-                                                                           'train_rand', type='face', aug='True')
-        self.face_loader_train_tl, _ = data_loader.gen_data(config.trainingdb['face_train'], 'train', type='face',
-                                                            aug='True')
-        self.peri_loader_train, _ = data_loader.gen_data(config.trainingdb['peri_train'], 'train_rand',
-                                                         type='periocular', aug='True')
-        self.peri_loader_train_tl, _ = data_loader.gen_data(config.trainingdb['peri_train'], 'train', type='periocular',
-                                                            aug='True')
+        self.train_loader, self.train_set = data_loader.gen_plusvein_data(
+            config.trainingdb['root_dir'],
+            mode='train',
+            sessions=config.trainingdb['train_sessions'],
+            class_mode=config.trainingdb['class_mode'],
+            aug='True',
+            input_size=(112, 112),
+            roi_size=None,
+            balanced=True
+        )
 
-        self.face_num_sub = len(self.face_train_set.classes)
+        self.num_classes = self.train_set.num_classes
 
     def _configure_gradients(self):
         """實作原始的參數凍結邏輯"""
@@ -260,19 +211,29 @@ class BiometricTrainer:
         self.feature_extractor = net.FSB_Hash_Net(embedding_size=self.cfg.dim, do_prob=self.cfg.dropout).to(self.device)
 
         # 處理特徵提取器的預訓練權重載入
-        state_dict_loaded = self.feature_extractor.state_dict()
-        state_dict_pretrained = torch.load(self.cfg.pretrained_path, map_location=self.device)['state_dict']
-        state_dict_temp = {k: state_dict_pretrained['backbone.' + k] for k in state_dict_loaded if 'encoder' not in k}
-        state_dict_loaded.update(state_dict_temp)
-        self.feature_extractor.load_state_dict(state_dict_loaded)
+        if self.cfg.pretrained_path and os.path.exists(self.cfg.pretrained_path):
+            state_dict_loaded = self.feature_extractor.state_dict()
+            state_dict_pretrained = torch.load(self.cfg.pretrained_path, map_location=self.device)['state_dict']
+            state_dict_temp = {}
+            for key in state_dict_loaded:
+                if 'encoder' in key:
+                    continue
+                pretrained_key = 'backbone.' + key
+                if pretrained_key in state_dict_pretrained:
+                    pretrained_weight = state_dict_pretrained[pretrained_key]
+                    if pretrained_weight.shape == state_dict_loaded[key].shape:
+                        state_dict_temp[key] = pretrained_weight
+            state_dict_loaded.update(state_dict_temp)
+            self.feature_extractor.load_state_dict(state_dict_loaded)
+        else:
+            print("Skipping pretrained backbone (path not provided or missing).")
 
         self.generator = net.Hash_Generator(embedding_size=self.cfg.dim, do_prob=self.cfg.dropout, device=self.device,
                                             out_embedding_size=self.cfg.hash_dim).to(self.device)
-        self.discriminator = net.Modality_Discriminator(input_dim=512).to(self.device)
 
-        self.feat_fc = ArcFace(in_features=self.cfg.dim, out_features=self.face_num_sub, s=64.0, m=params.af_m,
+        self.feat_fc = ArcFace(in_features=self.cfg.dim, out_features=self.num_classes, s=64.0, m=params.af_m,
                                device=self.device).to(self.device)
-        self.hash_fc = ArcFace(in_features=self.cfg.hash_dim, out_features=self.face_num_sub, s=128.0, m=params.af_m,
+        self.hash_fc = ArcFace(in_features=self.cfg.hash_dim, out_features=self.num_classes, s=128.0, m=params.af_m,
                                device=self.device).to(self.device)
 
         # 在此實作您原本配置 requires_grad 與 BatchNorm 行為的邏輯
@@ -280,38 +241,31 @@ class BiometricTrainer:
 
     def _setup_optimizers(self):
         """配置優化器、損失函數與排程器"""
-        self.loss_fn = {'loss_ce': nn.CrossEntropyLoss(), 'loss_bce': nn.BCELoss()}
+        self.loss_fn = {'loss_ce': nn.CrossEntropyLoss()}
 
         params_fe = [p for p in self.feature_extractor.parameters() if p.requires_grad]
         params_gen = [p for p in self.generator.parameters() if p.requires_grad]
-        params_disc = [p for p in self.discriminator.parameters() if p.requires_grad]
         params_feat_fc = [p for p in self.feat_fc.parameters() if p.requires_grad]
         params_hash_fc = [p for p in self.hash_fc.parameters() if p.requires_grad]
 
-        self.optimizer_G = optim.AdamW([
+        self.optimizer = optim.AdamW([
             {'params': params_fe},
             {'params': params_gen},
             {'params': params_feat_fc, 'lr': self.cfg.lr * 10, 'weight_decay': self.cfg.w_decay},
             {'params': params_hash_fc, 'lr': self.cfg.lr * 10, 'weight_decay': self.cfg.w_decay},
         ], lr=self.cfg.lr, weight_decay=self.cfg.w_decay)
 
-        self.optimizer_D = optim.AdamW([{'params': params_disc, 'lr': params.lr, 'weight_decay': self.cfg.w_decay}],
-                                       lr=self.cfg.lr, weight_decay=self.cfg.w_decay)
-
-        self.scheduler_G = lr_scheduler.MultiStepLR(self.optimizer_G, milestones=params.lr_sch, gamma=0.1)
-        self.scheduler_D = lr_scheduler.MultiStepLR(self.optimizer_D, milestones=params.lr_sch, gamma=0.1)
+        self.scheduler = lr_scheduler.MultiStepLR(self.optimizer, milestones=params.lr_sch, gamma=0.1)
 
     def _set_train_mode(self):
         self.feature_extractor.train()
         self.generator.train()
-        self.discriminator.train()
         self.feat_fc.train()
         self.hash_fc.train()
 
     def _set_eval_mode(self):
         self.feature_extractor.eval()
         self.generator.eval()
-        self.discriminator.eval()
         self.feat_fc.eval()
         self.hash_fc.eval()
 
@@ -334,35 +288,33 @@ class BiometricTrainer:
 
             # 執行一個 epoch 的訓練
             train_acc, loss = train_module.run_train(
-                self.feature_extractor, self.generator, self.discriminator,
+                self.feature_extractor, self.generator,
                 feat_fc=self.feat_fc, hash_fc=self.hash_fc,
-                face_loader=self.face_loader_train, peri_loader=self.peri_loader_train,
-                face_loader_tl=self.face_loader_train_tl, peri_loader_tl=self.peri_loader_train_tl,
+                data_loader=self.train_loader,
                 net_params=vars(self.cfg), loss_fn=self.loss_fn,
-                optimizer_G=self.optimizer_G, optimizer_D=self.optimizer_D,
-                scheduler_G=self.scheduler_G, scheduler_D=self.scheduler_D,
+                optimizer=self.optimizer, scheduler=self.scheduler,
                 batch_metrics={'fps': train_module.BatchTimer(), 'acc': train_module.accuracy},
                 show_running=True, device=self.device, writer=self.writer
             )
 
             self._set_eval_mode()
-            val_peri_eer, test_peri, test_cross = self.evaluator.validate(self.feature_extractor, self.generator)
+            val_eer = self.evaluator.validate(self.feature_extractor, self.generator)
 
-            self._log_epoch(epoch, loss, val_peri_eer, test_peri, test_cross)
+            self._log_epoch(epoch, loss, val_eer)
 
-            if val_peri_eer >= self.best_val_eer and params.save:
-                self.best_val_eer = val_peri_eer
+            if val_eer >= self.best_val_eer and params.save:
+                self.best_val_eer = val_eer
                 self._save_models()
 
         # 訓練結束後進行最終的全資料集評估
         self.evaluator.evaluate_all_datasets(self.feature_extractor, self.generator)
 
-    def _log_epoch(self, epoch, loss, val_peri_eer, test_peri, test_cross):
+    def _log_epoch(self, epoch, loss, val_eer):
         """將每個 Epoch 的結果寫入日誌"""
         if self.cfg.write_log:
             with open(self.log_file, 'a+') as f:
                 f.write(f"Epoch {epoch + 1}/{self.cfg.epochs}\nLoss: {loss}\n")
-                f.write(f"Val EER (Peri): {val_peri_eer}\nTest Stolen (Peri): {test_peri}\n\n")
+                f.write(f"Val EER (Session 1→2): {val_eer}\n\n")
 
     def _save_models(self):
         """負責將最佳模型寫入磁碟"""
