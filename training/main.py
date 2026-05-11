@@ -215,6 +215,7 @@ class BiometricTrainer:
             state_dict_loaded = self.feature_extractor.state_dict()
             state_dict_pretrained = torch.load(self.cfg.pretrained_path, map_location=self.device)['state_dict']
             state_dict_temp = {}
+            skipped = []
             for key in state_dict_loaded:
                 if 'encoder' in key:
                     continue
@@ -223,8 +224,12 @@ class BiometricTrainer:
                     pretrained_weight = state_dict_pretrained[pretrained_key]
                     if pretrained_weight.shape == state_dict_loaded[key].shape:
                         state_dict_temp[key] = pretrained_weight
+                    else:
+                        skipped.append((key, state_dict_loaded[key].shape, pretrained_weight.shape))
             state_dict_loaded.update(state_dict_temp)
             self.feature_extractor.load_state_dict(state_dict_loaded)
+            for key, expected_shape, actual_shape in skipped:
+                print(f"Skipping pretrained weight for {key} (expected {expected_shape}, got {actual_shape}).")
         else:
             print("Skipping pretrained backbone (path not provided or missing).")
 

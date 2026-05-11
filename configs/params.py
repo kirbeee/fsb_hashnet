@@ -23,7 +23,7 @@ lr_sch = [6]
 w_decay = 1e-5
 dropout = 0.1
 momentum = 0.9
-pretrained_path = ''
+pretrained_path = None
 
 # Activate, or deactivate BatchNorm2D
 # bn_flag = 0, 1, 2
