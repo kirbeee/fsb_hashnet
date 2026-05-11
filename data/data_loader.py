@@ -99,17 +99,44 @@ class MyDataset(data.Dataset):
     def __len__(self):
         return len(self.dataset)
 
-PLUSVEIN_FILENAME_RE = re.compile(
+PLUSVEIN_NEW_FILENAME_RE = re.compile(
+    r'^(?P<scanner>PLUS-FV3-[A-Za-z0-9]+)_(?P<side>DORSAL|PALMAR)_(?P<session>\d{2})_(?P<subject>\d{3})_(?P<finger>\d{2})_(?P<image>\d{2})\.(bmp|png|jpg|jpeg)$',
+    re.IGNORECASE
+)
+PLUSVEIN_LEGACY_FILENAME_RE = re.compile(
     r'^(?P<subject>\d+)_(?P<finger>[A-Za-z]+)_(?P<session>\d+)_(?P<image>\d+)\.(bmp|png|jpg|jpeg)$',
     re.IGNORECASE
 )
+NUMERIC_FINGER_ORDER = ['02', '03', '04', '07', '08', '09']
 DEFAULT_FINGER_ORDER = ['LI', 'LM', 'LR', 'RI', 'RM', 'RR']
+
+def _parse_plusvein_filename(file_name):
+    match = PLUSVEIN_NEW_FILENAME_RE.match(file_name)
+    if match:
+        finger_code = match.group('finger').zfill(2)
+        return {
+            'subject': int(match.group('subject')),
+            'finger': finger_code,
+            'session': int(match.group('session'))
+        }
+    match = PLUSVEIN_LEGACY_FILENAME_RE.match(file_name)
+    if match:
+        return {
+            'subject': int(match.group('subject')),
+            'finger': match.group('finger').upper(),
+            'session': int(match.group('session'))
+        }
+    return None
 
 def _finger_sort_key(code):
     code = code.upper()
+    if code.isdigit():
+        if code in NUMERIC_FINGER_ORDER:
+            return (0, NUMERIC_FINGER_ORDER.index(code))
+        return (0, int(code))
     if code in DEFAULT_FINGER_ORDER:
-        return (0, DEFAULT_FINGER_ORDER.index(code))
-    return (1, code)
+        return (1, DEFAULT_FINGER_ORDER.index(code))
+    return (2, code)
 
 def build_plusvein_transforms(input_size, roi_size=None, augment=False):
     transform_steps = []
@@ -140,12 +167,12 @@ class PlusVeinFV3Dataset(data.Dataset):
             for file_name in files:
                 if not file_name.lower().endswith(('.bmp', '.png', '.jpg', '.jpeg')):
                     continue
-                match = PLUSVEIN_FILENAME_RE.match(file_name)
-                if not match:
+                parsed = _parse_plusvein_filename(file_name)
+                if not parsed:
                     continue
-                subject_id = int(match.group('subject'))
-                finger_code = match.group('finger').upper()
-                session_id = int(match.group('session'))
+                subject_id = parsed['subject']
+                finger_code = parsed['finger'].upper()
+                session_id = parsed['session']
                 if sessions is not None and session_id not in sessions:
                     continue
                 self.samples.append({
