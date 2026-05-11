@@ -233,6 +233,27 @@ class BiometricTrainer:
 
         self.face_num_sub = len(self.face_train_set.classes)
 
+    def _configure_gradients(self):
+        """實作原始的參數凍結邏輯"""
+        for name, param in self.feature_extractor.named_parameters():
+            if params.epochs_pre > 0:
+                param.requires_grad = False
+                if name in ['linear.weight', 'linear.bias',
+                            'bn.weight', 'bn.bias', 'bn.running_mean', 'bn.running_var'] or 'encoder' in name:
+                    param.requires_grad = True
+            else:
+                param.requires_grad = True
+
+                # BN 層處理
+        for name, layer in self.feature_extractor.named_modules():
+            if isinstance(layer, torch.nn.BatchNorm2d):
+                layer.momentum = params.bn_moment
+                layer.weight.requires_grad = False
+                layer.bias.requires_grad = False
+                if params.bn_flag == 0 or params.bn_flag == 1:
+                    layer.weight.requires_grad = True
+                    layer.bias.requires_grad = True
+
     def _build_models(self):
         """初始化並載入權重到所有神經網路組件"""
         print("Loading Models...")
@@ -255,7 +276,7 @@ class BiometricTrainer:
                                device=self.device).to(self.device)
 
         # 在此實作您原本配置 requires_grad 與 BatchNorm 行為的邏輯
-        # self._configure_gradients()
+        self._configure_gradients()
 
     def _setup_optimizers(self):
         """配置優化器、損失函數與排程器"""
@@ -307,7 +328,9 @@ class BiometricTrainer:
             self._set_train_mode()
 
             # 您原始腳本中解凍網路特定層的邏輯可以放在這裡
-            # if epoch + 1 > params.epochs_pre: ...
+            if epoch + 1 > params.epochs_pre:
+                for name, param in self.feature_extractor.named_parameters():
+                    param.requires_grad = True
 
             # 執行一個 epoch 的訓練
             train_acc, loss = train_module.run_train(
